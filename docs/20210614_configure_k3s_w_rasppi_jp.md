@@ -45,7 +45,7 @@ Kubernetes Clusterを手元で作れば、クラウドのマネージドサー�
 - SDカードを用意し
 - OSイメージ作成用のMACかWindowsでbalenaEtcherをダウンロードして実行
 - 左からOSイメージの指定、ドライブ(SDカード)の指定、実行ボタン
-![balenaEtcher](https://github.com/fujitake/k8slearn/blob/main/imgs/balenaEtcher.png)
+![balenaEtcher](https://github.com/fujitake/k8slearn/blob/main/imgs/balenaEthcher.png)
 
 
 ### 起動とOSセットアップ
