@@ -37,7 +37,7 @@ Kubernetes Clusterを手元で作れば、クラウドのマネージドサー�
 
 ### 構成イメージ
 クラスタ構成なので、workerを3台用意しています。master 1台とworker 1台でも機能検証はできるかと思います。
-![raspbPi_k3s_cluster.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/1557529/16a523f5-c3e1-c03e-395b-1191d3443963.png)
+![raspbPi_k3s_cluster.png](https://github.com/fujitake/k8slearn/blob/main/imgs/raspbPi_k3s_cluster.png)
 
 
 ## 3.下準備
@@ -262,5 +262,5 @@ K3s Master Nodeのアンインストール方法
 /usr/local/bin/k3s-agent-uninstall.sh # Worker Node用
 ```
 ## 参考
-[RANCHER社のK3sリファレンス(英語)](https://rancher.com/docs/k3s/latest/en/)
+[RANCHER社のK3sリファレンス(英語)](https://rancher.com/docs/k3s/latest/en/)  
 [RANCHER Labs 日本語版K3sマニュアル](https://rancher.co.jp/pdfs/K3s-eBook4Styles0507.pdf)
