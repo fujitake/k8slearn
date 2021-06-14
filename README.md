@@ -25,7 +25,7 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### Kubernetesの基礎を実践的に理解する
 
-- ![2時間でRaspberry Piを使ったKubernetes Clusterを作る](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_rasppi_jp.md)
+- [2時間でRaspberry Piを使ったKubernetes Clusterを作る](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_rasppi_jp.md)
 - ノートPCを使ってKubernetes Clusterを作ってみた
 - Kubernetes上でデータベースPodを作成してみる​
 - Kubernetes上でWebサービスを起動する
