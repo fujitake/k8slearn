@@ -2,7 +2,7 @@
 この手順を辿れば、Kubernetes Clusterが完成します。
 後半の手順は、他の記事を参照しています。
 
-Kubernetes Clusterを手元で作れば、クラウドのマネージドサービスに費用を払い続けることなく、動作を理解することができるんじゃないかな〜ってことで[Raspberry Pi 4BでK3s Cluster環境を作ってみる](https://qiita.com/vfuji/private/f575673b83f78dd6e4ba)を用意しました。こちらは、ClusterをノートPC作ってみた版(コンテナイメージ的にはX86-64版)となります。
+Kubernetes Clusterを手元で作れば、クラウドのマネージドサービスに費用を払い続けることなく、動作を理解することができるんじゃないかな〜ってことで[Raspberry Pi 4BでK3s Cluster環境を作ってみる](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_rasppi_jp.md)を用意しました。こちらは、ClusterをノートPC作ってみた版(コンテナイメージ的にはX86-64版)となります。
 
 *Kubernetes自体、Pod、Deployment、StatefulSet、Namespace、CNIなど、基本を理解したい場合は、他の記事を読むことをお勧めします。最終的には理解してないとClusterとしての動作がわからんのですが、、、*
 
