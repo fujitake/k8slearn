@@ -36,7 +36,7 @@ Kubernetes Clusterを手元で作れば、クラウドのマネージドサー�
 - UNetbootinにて起動可能なUSBメモリを作成  
 事前にダウンロードしたOSイメージファイル(ISOファイル)を指定し、USBドライブを指定してOKをクリック
 USBドライブは事前にFAT32フォーマットしておくと選択肢に表示される  
-![unetbootin.png](../../imgs/unetbootin.png)
+![unetbootin.png](../imgs/unetbootin.png)
 
 ### 起動とOSセットアップ
 - PC起動時にUEFI/BIOS起動設定で上記にて作成したUSBメモリから起動を選択  
