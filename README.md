@@ -3,7 +3,7 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### Understanding Kubernetes basics
 
-- [Create Kubernetes Cluster with Raspberry Pi](docs/eng/configure_k3s_w_rasppi_jp.md)
+- [Create Kubernetes Cluster with Raspberry Pi](docs/eng/configure_k3s_w_rasppi.md)
 - [Create Kubernetes Cluster with Note PC](docs/jp/configure_k3s_w_notepc.md)
 - [Set up Database Pods on Kubernetes](docs/jp/setup_db_pods.md)
 - Launch web service on Kubernetes Cluster
@@ -29,7 +29,7 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### Kubernetesの基礎を実践的に理解する
 
-- [2時間でRaspberry Piを使ったKubernetes Clusterを作る](docs/jp/configure_k3s_w_rasppi_jp.md)
+- [2時間でRaspberry Piを使ったKubernetes Clusterを作る](docs/jp/configure_k3s_w_rasppi.md)
 - [ノートPCを使ってKubernetes Clusterを作ってみた](docs/jp/configure_k3s_w_notepc.md)
 - [Kubernetes上でデータベースPodを作成してみる](docs/jp/setup_db_pods.md)
 - Kubernetes上でWebサービスを起動する
