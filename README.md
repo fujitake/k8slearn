@@ -3,14 +3,18 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### Understanding Kubernetes basics
 
-- Create Kubernetes Cluster with Raspberry Pi
-- Create Kubernetes Cluster with Note PC
-- Set up Database Pods on Kubernetes
+- [Create Kubernetes Cluster with Raspberry Pi](docs/eng/configure_k3s_w_rasppi_jp.md)
+- [Create Kubernetes Cluster with Note PC](docs/jp/configure_k3s_w_notepc.md)
+- [Set up Database Pods on Kubernetes](docs/jp/setup_db_pods.md)
 - Launch web service on Kubernetes Cluster
 - Try to do failure test with simple Pods
 - Improve availability of the Pods
 - Configure HTTPS
 - Try again failure test with high availability configuration
+
+### Debugging Kubernetes
+
+- Failure Pod run
 
 ### Misc
 
@@ -25,14 +29,18 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### Kubernetesの基礎を実践的に理解する
 
-- [2時間でRaspberry Piを使ったKubernetes Clusterを作る](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_rasppi_jp.md)
-- [ノートPCを使ってKubernetes Clusterを作ってみた](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_notepc.md)
-- [Kubernetes上でデータベースPodを作成してみる​](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_setup_db_pods.md)
+- [2時間でRaspberry Piを使ったKubernetes Clusterを作る](docs/jp/configure_k3s_w_rasppi_jp.md)
+- [ノートPCを使ってKubernetes Clusterを作ってみた](docs/jp/configure_k3s_w_notepc.md)
+- [Kubernetes上でデータベースPodを作成してみる](docs/jp/setup_db_pods.md)
 - Kubernetes上でWebサービスを起動する
 - シンプルなPodで障害試験を試す
 - Kubernetes上のWebサービスを可用性の高い構成に変更する
 - Kubernetes上のWebサービスをHTTPSにする
 - Kubernetes上で可用性が高い構成を使って、障害試験を試してみる
+
+### Kubernetes デバッグ
+
+- Podが起動しない
 
 ### その他
 
