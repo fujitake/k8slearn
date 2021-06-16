@@ -27,20 +27,20 @@ Intel CPUやAMD CPUの場合はAMD64、Raspberry Piの場合はARM64
 目的とするコンテナイメージが自分の持っているKubernetesシステムアーキテクチャに対応することを確認
 
 docker hubでmysqlを検索すると、x86−64に対応することは確認できますが、ARM64対応は記載がありません。
-![dockerlofficialimage_mysql.png](https://github.com/fujitake/k8slearn/blob/main/imgs/dockerlofficialimage_mysql.png)
+![dockerlofficialimage_mysql.png](../../imgs/dockerlofficialimage_mysql.png)
 
 同じくdocker hubでmongoを検索してみました。こちらはx86-64とARM64の両方に対応していることが確認できました。
-![dockerlofficialimage_mongo.png](https://github.com/fujitake/k8slearn/blob/main/imgs/dockerlofficialimage_mongo.png)
+![dockerlofficialimage_mongo.png](../../imgs/dockerlofficialimage_mongo.png)
 
 ### 提供されているDatabaseのバージョンを確認
 目的とするDatabaseのバージョンを検索するなどして確認
 
 同じくdocker hubでmongoの特定バージョンを検索した結果です。同じバージョンで、複数のアーキテクチャに対応したイメージを提供していることが確認できます。
-![dockerhubtag_mongo.png](https://github.com/fujitake/k8slearn/blob/main/imgs/dockerhubtag_mongo.png)
+![dockerhubtag_mongo.png](../../imgs/dockerhubtag_mongo.png)
 
 同じくdocker hubでmysqlの特定バージョンを検索した結果です。amd64(x86-64)しか見つからないことが確認できます。
 ということは、Raspberry Piで作ったKubernetesでは動作しない、ということになります。
-![dockerhubtag_mysql.png](https://github.com/fujitake/k8slearn/blob/main/imgs/dockerhubtag_mysql.png)
+![dockerhubtag_mysql.png](../../imgs/dockerhubtag_mysql.png)
 
 ### ソフトウェア提供元が定義しているサポートバージョンを確認
 この手順は、オプションであり、スキップ可能ですが、知っておいた方が良いと思います。
@@ -50,10 +50,10 @@ docker hubでmysqlを検索すると、x86−64に対応することは確認で
 また、下記はいずれもコンテナ化した場合のサポート情報ではありません。
 
 [MySQLのサポートプラットフォーム情報](https://www.mysql.com/support/supportedplatforms/database.html)
-![suportedpf_mysql.png](https://github.com/fujitake/k8slearn/blob/main/imgs/suportedpf_mysql.png)
+![suportedpf_mysql.png](../../imgs/suportedpf_mysql.png)
 
 [MongoDBの推奨プラットフォーム情報/ARM64](https://docs.mongodb.com/manual/administration/production-notes/#std-label-prod-notes-recommended-platforms)
-![suportedpf_mongo.png.png](https://github.com/fujitake/k8slearn/blob/main/imgs/suportedpf_mongo.png)
+![suportedpf_mongo.png](../../imgs/suportedpf_mongo.png)
 
 ## デプロイの準備と実行
 ### 各コンテナイメージの環境変数(Environment Variables)を確認
@@ -61,11 +61,11 @@ docker hubでmysqlを検索すると、x86−64に対応することは確認で
 Docker Official Imagesでは、以下のような形で環境変数が説明されています。これは提供されているイメージの説明ページによって記載方法が違うため、都度確認が必要となります。
 
 Docker Official Images: MySQLの環境に関する説明
-![dockerhub_envval_mysql.png](https://github.com/fujitake/k8slearn/blob/main/imgs/dockerhub_envval_mysql.png)
+![dockerhub_envval_mysql.png](../../imgs/dockerhub_envval_mysql.png)
 
 
 Docker Official Images: Mongoの環境変数に関する説明
-![dockerhub_envval_mongo.png](https://github.com/fujitake/k8slearn/blob/main/imgs/dockerhub_envval_mongo.png)
+![dockerhub_envval_mongo.png](../../imgs/dockerhub_envval_mongo.png)
 
 ### Pod作成準備
 以降の手順については、システムアーキテクチャの差分はありません。MySQL(x86-64)の例のみ記載します。

@@ -37,7 +37,7 @@ Kubernetes Clusterを手元で作れば、クラウドのマネージドサー�
 
 ### 構成イメージ
 クラスタ構成なので、workerを3台用意しています。master 1台とworker 1台でも機能検証はできるかと思います。
-![raspbPi_k3s_cluster.png](https://github.com/fujitake/k8slearn/blob/main/imgs/raspbPi_k3s_cluster.png)
+![raspbPi_k3s_cluster.png](../../imgs/raspbPi_k3s_cluster.png)
 
 
 ## 3.下準備
@@ -45,7 +45,7 @@ Kubernetes Clusterを手元で作れば、クラウドのマネージドサー�
 - SDカードを用意し
 - OSイメージ作成用のMACかWindowsでbalenaEtcherをダウンロードして実行
 - 左からOSイメージの指定、ドライブ(SDカード)の指定、実行ボタン
-![balenaEtcher](https://github.com/fujitake/k8slearn/blob/main/imgs/balenaEthcher.png)
+![balenaEtcher](../../imgs/balenaEthcher.png)
 
 
 ### 起動とOSセットアップ
