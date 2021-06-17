@@ -240,7 +240,7 @@ K3s agent nodeのInstall (Agentの3台分実施)
 *ノード間でホスト名が名前解決できる必要がある*
 
 ```shell:Agentのインストール
-curl -sfL https://get.k3s.io | K3S_URL=https://pi4-master:6443 K3S_TOKEN=K10****0f sh -f
+curl -sfL https://get.k3s.io | K3S_URL=https://master1:6443 K3S_TOKEN=K10****0f sh -f
 ```
 Nodeを確認
 
