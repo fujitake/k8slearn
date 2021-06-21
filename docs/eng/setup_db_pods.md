@@ -1,83 +1,83 @@
-## はじめに
-この手順を辿れば、ARM64 Kubernetes上でDocker Official ImageからデータベースPodを起動できます。
+## Introduction
+With following these steps, it will be able to start a database pod from a Docker Official Image on ARM64 Kubernetes.
 
-## この記事について
-実践的にKubernetesを学習できればと思い、Pod作成の記事を書いてみました。
+## Purpose
+To learn Kubernetes in a practical way, described this article on creating a Pod.
 
-## 前提条件
-この記事を書く時に使った環境は下記の通りです。
+## Prerequisites
+The environment I used to write this article is as follows.
 
 - [K3s: v1.20.6+k3s1](https://k3s.io)
 - Raspberry Pi 4B 4GB Memory
-- インターネットアクセス環境
-- LinuxをCLIのみで触る程度の知識か根性
+- Internet access environment
+- Knowledge of Linux with CLI only or Guts
 
-### ソフトウェア
+### Software
 - K3s: [v1.20.6+k3s1](https://k3s.io)  
 - MongoDB: 4-bionic (docker.io/mongo:4-bionic)
-- 本記事では32bit Raspbian OSやWindows環境、Mac環境は対象としていません、というか確認していません。
+- This article does not cover the 32-bit Raspbian OS, Windows environment, or Mac environment.
 
-## 事前確認事項の整理
-### ハードウェアのシステムアーキテクチャを確認
-データベースPodをセットアップする対象がX86-64(AMD64)なのか、ARM64なのか確認  
-Intel CPUやAMD CPUの場合はAMD64、Raspberry Piの場合はARM64  
-コンテナイメージが対応していないシステムアーキテクチャのPodは起動しません。注意が必要です。
+## Organize preliminary confirmation items
+### Check the system architecture of the hardware
+- Check if the database pod is set up for X86-64 (AMD64) or ARM64  
+- AMD64 for Intel and AMD CPUs, ARM64 for the Raspberry Pi
+- Pods with system architectures that are not supported by the container image will not be started. It should be careful.
 
-### Official Docker Imageの対応状況を確認
-目的とするコンテナイメージが自分の持っているKubernetesシステムアーキテクチャに対応することを確認
+### Check the support status of Official Docker Image
+Make sure that the target container image corresponds to the Kubernetes system architecture you have.
 
-docker hubでmysqlを検索すると、x86−64に対応することは確認できますが、ARM64対応は記載がありません。
+When searching for **mysql** in docker hub, it can see that it supports x86-64, but there is no mention of ARM64 support.
 ![dockerlofficialimage_mysql.png](../../imgs/dockerlofficialimage_mysql.png)
 
-同じくdocker hubでmongoを検索してみました。こちらはx86-64とARM64の両方に対応していることが確認できました。
+Searching for **mongo** in docker hub as well. It will see that it supports both x86-64 and ARM64.
 ![dockerlofficialimage_mongo.png](../../imgs/dockerlofficialimage_mongo.png)
 
-### 提供されているDatabaseのバージョンを確認
-目的とするDatabaseのバージョンを検索するなどして確認
+### Check the version of the Database provided
+Check the version of the database you want to use by searching for it.
 
-同じくdocker hubでmongoの特定バージョンを検索した結果です。同じバージョンで、複数のアーキテクチャに対応したイメージを提供していることが確認できます。
+The following is the result of searching for **a specific version of mongo** on docker hub.It can be confirmed that the same version provides images for multiple architectures.
 ![dockerhubtag_mongo.png](../../imgs/dockerhubtag_mongo.png)
 
-同じくdocker hubでmysqlの特定バージョンを検索した結果です。amd64(x86-64)しか見つからないことが確認できます。
-ということは、Raspberry Piで作ったKubernetesでは動作しない、ということになります。
+In the similar way, here is the result of searching for **a specific version of mysql** in docker hub.It can be confirmed that only amd64 (x86-64) is found.
+This means that it will not work with Kubernetes built on a Raspberry Pi.
 ![dockerhubtag_mysql.png](../../imgs/dockerhubtag_mysql.png)
 
-### ソフトウェア提供元が定義しているサポートバージョンを確認
-この手順は、オプションであり、スキップ可能ですが、知っておいた方が良いと思います。
+### Check the supported versions as defined by the software provider
+This step is optional and can be skipped, but it's good to know.
 
-ソフトウェアのサポートプラットフォームとバージョン及び依存関係を確認
-ソフトウェア提供元が提供している、プロダクション環境で動作させる上での推奨プラットフォームとバージョンに関する情報を確認しまします。`supported version mysql`もしくは`suppored platforms mysql`などで検索すると見つけやすいです。
-また、下記はいずれもコンテナ化した場合のサポート情報ではありません。
+Check the supported platforms, versions and dependencies of the software.
+Check the information provided by the software provider about the recommended platform and version to run the software in a production environment. It is easy to find by `supported version mysql` or `suppored platforms mysql`.
+Also, none of the following is support information for containerized cases.
 
-[MySQLのサポートプラットフォーム情報](https://www.mysql.com/support/supportedplatforms/database.html)
+[MySQL Supported Platfolrm Information](https://www.mysql.com/support/supportedplatforms/database.html)
 ![suportedpf_mysql.png](../../imgs/suportedpf_mysql.png)
 
-[MongoDBの推奨プラットフォーム情報/ARM64](https://docs.mongodb.com/manual/administration/production-notes/#std-label-prod-notes-recommended-platforms)
+[MongoDB Recommended Platform Information/ARM64](https://docs.mongodb.com/manual/administration/production-notes/#std-label-prod-notes-recommended-platforms)
 ![suportedpf_mongo.png](../../imgs/suportedpf_mongo.png)
 
-## デプロイの準備と実行
-### 各コンテナイメージの環境変数(Environment Variables)を確認
-コンテナイメージを起動する際に初期値として渡す環境変数の条件を確認します。コンテナイメージを作った時に決まる要素なので、都度確認する必要があります。そうでなければ、コンテナ(Pod)起動後に個別設定が必要となってしまうでしょうから、必須の確認項目となるかと。
-Docker Official Imagesでは、以下のような形で環境変数が説明されています。これは提供されているイメージの説明ページによって記載方法が違うため、都度確認が必要となります。
+## Preparing and Executing a Deployment
+### Check the Environment Variables of each container image
+Check the conditions of the environment variables that are passed as initial values when launching the container image. This is an element that is determined when the container image is created, so it needs to be checked every time. Otherwise, it will be necessary to configure it individually after the container (Pod) is started, so it is considered a mandatory check item.
+In Docker Official Images, environment variables are described in the following way. It is necessary to check this information each time because the way it is described differs depending on the image description page provided.
 
-Docker Official Images: MySQLの環境に関する説明
+Docker Official Images: Description of MySQL environment
 ![dockerhub_envval_mysql.png](../../imgs/dockerhub_envval_mysql.png)
 
 
-Docker Official Images: Mongoの環境変数に関する説明
+Docker Official Images: Description of Mongo environment
 ![dockerhub_envval_mongo.png](../../imgs/dockerhub_envval_mongo.png)
 
-### Pod作成準備
-以降の手順については、システムアーキテクチャの差分はありません。MySQL(x86-64)の例のみ記載します。
-ちなみに、こちらの例はセキュアではありません。
-パスワードは都度個別にsecretで運用すべきですが、説明用としてsecretを使うものと直書きの両方を案内します。
-下記のように設定するとMySQL ROOTのパスワードが`rootpass01`となります。適宜変更して使って下さい。
+### Preparation for Creating a Pod
+For the following steps, there is no difference in system architecture.Only the MySQL (x86-64) example is described.
+By note, this example is not secure.
+Passwords should be used individually with secret for each case, but for illustrative purposes, here is a guide to both using secret and direct writing.
+If set as follows, the password for MySQL ROOT will be `rootpass01`. Please change it to suit your needs.
 
-```shell:コマンド
+```shell:command
 kubectl create secret generic mysql-pass --from-literal=password=rootpass01
 ```
 
-Pod作成用yamlの用意
+Prepare yaml for creating a pod.
 
 ```yaml:mysql-pod.yaml
 apiVersion: v1
@@ -89,22 +89,22 @@ metadata:
 spec:
   containers:
   - name: mysql
-    image: mysql:5.7   # このように指定するとdocker hubのMySQL 5.7となります
+    image: mysql:5.7   # If specifying it like this, it will be MySQL 5.7 on docker hub
     env:
-    - name: MYSQL_USER       # 環境変数を直接指定
-      value: user01          # ユーザー名
-    - name: MYSQL_PASSWORD   # 環境変数を直接指定
-      value: password01      # 上記にて設定するユーザーのパスワード
-    - name: MYSQL_DATABASE   # 環境変数を直接指定
-      value: database01      # データベース名称
-    - name: MYSQL_ROOT_PASSWORD # secretを使った環境変数の指定
+    - name: MYSQL_USER       # Specify environment variable directly
+      value: user01          # User name
+    - name: MYSQL_PASSWORD   # Specify environment variable directly
+      value: password01      # Password of the user to be set above
+    - name: MYSQL_DATABASE   # Specify environment variable directly
+      value: database01      # Database name
+    - name: MYSQL_ROOT_PASSWORD # Specifying environment variable using secret
       valueFrom:                #
-        secretKeyRef:           # secretsを参照
-          name: mysql-pass      # secretsの名称
-          key: password         # secretsのkey
+        secretKeyRef:           # Refer to the secrets
+          name: mysql-pass      # Name of secrets
+          key: password         # Key of secrets
     ports:
     - name: mysql
-      containerPort: 3306    # コンテナのポート番号
+      containerPort: 3306    # Port number of the container
       protocol: TCP
     volumeMounts:
     - name: watashino-mysql-storage
@@ -114,25 +114,25 @@ spec:
     emptyDir: {}
 ```
 
-### Podのデプロイと確認
-上記で作ったsecretとyamlを使ってPodを作成します。
+### Deploy and Verify the Pod
+Create a Pod using the secret and yaml created above.
 
-```shell:コマンド
+```shell:command
 kubectl apply -f mysql-pod.yaml
 ```
 
-確認しましょう。
+Now let's check.
 
-```shell:コマンド
+```shell:command
 kubectl get pods
 NAME                                READY   STATUS      RESTARTS   AGE
 watashino-mysql                     1/1     Running     0          3m
 
 ```
 
-Podが起動したら中身を確認します。
+After the Pod is launched, check its contents.
 
-```shell:コマンド
+```shell:command
 kubectl exec -it pods/watashino-mysql -- /bin/sh
 # mysql -u user01 -h localhost -p
 Enter password:
@@ -164,15 +164,15 @@ Bye
 ```
 
 
-## 備考
-Podのアンインストール方法
+## Note
+How to Uninstall Pod
 
-```shell:コマンド
+```shell:command
 kubectl delete pods/watashino-mysql
 ```
 
-Secretのアンインストール方法
+How to Uninstall Secret
 
-```shell:コマンド
+```shell:command
 kubectl delete secrets/mysql-pass
 ```

@@ -24,7 +24,7 @@ Kubernetes Clusterを手元で作れば、クラウドのマネージドサー�
 
 ## 2.環境を用意
 ### ハードウェア
-- Raspberry Pi 4B 4GB Memory 4台(3B、3B+でも動作しました、ちょっともっさりするけど)
+- Raspberry Pi 4B 4GB Memory 4台 (3B/3B+でもインストール可能ですが、期待する動作をしませんでした)
 - キーボード、マウス、ディスプレイは1セットあればOK
 - 有線LANか無線LAN
 - MACかWindows (OSイメージ作成用とSSHアクセス用のホスト)
@@ -115,7 +115,7 @@ Status: inactive # activeになっている場合はk3sの通信要件などを�
 ここからが本番ですが、準備あらかた終わったとも言える
 ### K3s動作条件の設定
 - コントロールグループ設定追加  
-`/boot/firmware/cmdline.txt`に`"cgroup_memory=1 cgroup_enable=memory"`を<font color="red">改行せず1行で記載</font>すること  
+`/boot/firmware/cmdline.txt`に`"cgroup_memory=1 cgroup_enable=memory"`を改行せず1行で記載すること  
 設定変更後に再起動
 
 ```shell:コントロールグループ設定追加
@@ -135,7 +135,7 @@ FATA[2021-05-01T09:31:09.012916768Z] failed to find memory cgroup, you may need 
 
 ```
 
-### K3s Master Nodeインストール 1台目
+### K3s Master Nodeインストール
 [K3sのページ](https://k3s.io)では、手順は超シンプル、とガイドされています。インストールコマンド叩いて、ちょっとまって(30秒?)、k3s kubectl get nodeでノードがReadyになったことを確認する、と。これは本当です。ネイティブのK8sと比較すると、すごい、以外の言葉はありません。
 が、ここでは、やりたいことがあるので、オプション付きで進めます。
 

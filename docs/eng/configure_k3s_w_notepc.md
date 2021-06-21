@@ -1,100 +1,101 @@
-## はじめに
-この手順を辿れば、Kubernetes Clusterが完成します。
-後半の手順は、他の記事を参照しています。
+## Introducion
+With following steps, you will be able to get a Kubernetes Cluster.
+The later part of this procedure referred to other article.
 
-Kubernetes Clusterを手元で作れば、クラウドのマネージドサービスに費用を払い続けることなく、動作を理解することができるんじゃないかな〜ってことで[Raspberry Pi 4BでK3s Cluster環境を作ってみる](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_rasppi_jp.md)を用意しました。こちらは、ClusterをノートPC作ってみた版(コンテナイメージ的にはX86-64版)となります。
+Creating a Kubernetes Cluster at your own hand would help you understanding how it works without keep paying for a cloud services, so I thought I'd try to write up [Create Kubernetes Cluster with Raspberry Pi](https://github.com/fujitake/k8slearn/blob/main/docs/eng/configure_k3s_w_rasppi.md). This document is for the Notebook PC version (X86-64 version in terms of container image).
 
-*Kubernetes自体、Pod、Deployment、StatefulSet、Namespace、CNIなど、基本を理解したい場合は、他の記事を読むことをお勧めします。最終的には理解してないとClusterとしての動作がわからんのですが、、、*
+*It is recommended to read other articles to understand the basics of Kubernetes itself, Pod, Deployment, StatefulSet, Namespace, CNI, etc. Finally, you need to know those words, if you want to understand Kubernetes as a Cluster.*
 
-## この記事について
-学習コストを極力下げるという意図もあり、K3sを使いました。
-オリジナルのKubernetesをインストールするとか、CNIは何にしよう、とか面倒なことは省きます。
+## Purpose
+Selected K3s because we wanted to reduce the learning cost as much as possible. You don't need worry about installing the original Kubernetes and which CNI you should use.
+When I started to learn Kubernetes, I followed step by step and installed Kubernetes manually, but I strongly suggest you to learn with below steps, if you want to learn Kubernetes as a cluster. If you are ok to use as a single node, Minikube or Docker for Desktop would be enough.
 
-## 前提条件
-- インターネットアクセス環境
-- LinuxをCLIのみで触る程度の知識か根性
+## Prepare the Environment
+- Internet access environment
+- Knowledge of Linux using CLI commands
 
-## 環境を用意
-### ハードウェア
+## Preparations
+### Hardware
 - Lenovo E460 Intel Core i5-6200U 2 core/4 thread 16GB Memory  
-*今後使う予定のないPCの方が良いと思います*
-- 有線LAN
-- MACかWindows (OSイメージ作成用とSSHアクセス用のホスト)
+*Better to use a PC that you DON'T have a plan to use in the future.*
+- Wired LAN
+- MAC or Windows (Host for OS image creation and Host for SSH access)
 
-### ソフトウェア
-- OS: [Ubuntu Server 20.04.2 LTS 64ビット](https://ubuntu.com/download/server)
-- OSイメージ作成ツール: [UNetbootin](https://unetbootin.github.io)
+### Software
+- OS: [Ubuntu Server 20.04.2 LTS 64 bits](https://ubuntu.com/download/server)
+- OS Image Creation Tool: [UNetbootin](https://unetbootin.github.io)
 - K3s: [v1.20.6+k3s1](https://k3s.io)  
-*ネイティブKubernetesをインストールしても良いですが、CNI何にしよう、とか色々考える必要のないK3sが手元で試すKubernetes Clusterとしてはベストだと思います。たぶん。*
+OK to install native Kubernetes, but using K3s would be the best for learning without spending lots of time to dealing with details like what kind of CNI that you want to use, etc.
 
-## 下準備
-### OSイメージ作成
-- ノートPCを工場出荷時に戻せるよう、USBリカバリドライブなどを作成  
-*工場出荷時OS(Windowsなど)に戻すにはUSBリカバリードライブなどが必要なケースが大半です。この手順をスキップしてしまうと、ノートPCを元に戻すために<font color="red">有償サポートをメーカーに依頼する必要</font>が起きるかもしれません。<font color="red">ご注意の上、ご実施下さい。</font>*
-- Ubuntu Serverを上記リンクよりダウンロード
-- USBメモリ 2GB以上を用意 (Desktopなどをインストールする場合、2GBでは足りない)
-- UNetbootinにて起動可能なUSBメモリを作成  
-事前にダウンロードしたOSイメージファイル(ISOファイル)を指定し、USBドライブを指定してOKをクリック
-USBドライブは事前にFAT32フォーマットしておくと選択肢に表示される  
+## Preparations
+### Create OS image
+- Create a USB recovery drive, etc., to restore the Notebook PC to its factory settings.  
+Usually, required a USB recovery drive or similar device, if you want to recover the factory OS (e.g. Windows). If you forgot to prepare it, you may require to **ask the manufacturer for paid support** to get your Notebook PC back to normal. **Please do so with caution**.
+- Download Ubuntu Server from the link above
+- USB memory: 2GB or more (2GB is not enough when installing Desktop, etc.)
+- Create a bootable USB memory with UNetbootin
+Specify the OS image file (ISO file) that is downloaded in advance, specify the USB drive, and click OK.
+USB drive should be FAT32 formatted beforehand to show up as an option.
 ![unetbootin.png](../../imgs/unetbootin.png)
 
-### 起動とOSセットアップ
-- PC起動時にUEFI/BIOS起動設定で上記にて作成したUSBメモリから起動を選択  
-*まだ、戻れます。工場出荷時に戻せますか？*
-- インストールステップの各種質問に適宜答え、インストールを完了  
-- (必要に応じて)ネットワーク設定ファイルの修正
+### Boot and OS Setup
+- Select to boot from the USB flash drive created above in the UEFI/BIOS boot settings at PC startup  
+`It is still possible to step back. Is it ok to discard your DATA and OS?`
+- Answer the various questions in the installation step and complete the installation  
+- Modify the network configuration file (if necessary)
 
 ```shell:cloud-init.yaml
-sudo cp /etc/netplan/50-cloud-init.yaml /etc/netplan/99-cloud-init.yaml # ファイルをコピー
+sudo cp /etc/netplan/50-cloud-init.yaml /etc/netplan/99-cloud-init.yaml # Copy the file
 sudo vi /etc/netplan/99-cloud-init.yaml
-sudo netplan apply # 設定変更の適用
+sudo netplan apply # Applying setting changes
 ```
-- 99-cloud-init.yamlの修正
+- Modify 99-cloud-init.yaml
 
-```shell:修正例
+```shell:Example of modification
 # to it will not persist across an instance reboot.  To disable cloud-init's
 # network configuration capabilities, write a file
 # /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
 # network: {config: disabled}
 network:
     version: 2
-    ethernets: # 有線LANの設定
+    ethernets: # Wired LAN Settings
         eth0:
             dhcp4: true
             optional: true
-    wifis: # 無線LANの設定
+    wifis: # Wireless LAN Settings
         wlan0:
-            dhcp4: true # 固定IPの場合、falseにする
+            dhcp4: true # For static IP, set to false
             optional: true
             access-points:
-              <yourssid>: # SSIDを<youssid>の箇所に入力、コロンの後に改行
-                password: “<yourpassword>” # パスワードはダブルクオートで囲む
+              <yourssid>: # Provide the SSID in the <youssid> field, followed by a colon and a new line
+                password: “<yourpassword>” # Enclose the password in double quotes
 
 ```
-- 初期ログイン
+- Initial login
 
-```shell:初期ログイン
+```shell:Initial login
 Username: ubuntu
-Password: ubuntu #ログイン後変更を促される
+Password: ubuntu # Prompted to change it after logging in
 ```
-- キーボード設定
+- Keyboard settings
 
-```shell:キーボード設定
+```shell:Keyboard settings
 sudo dpkg-reconfigure keyboard-configuration
 ```
-- その他設定の確認
+- Check other settings
 
-```shell:その他設定の確認
+```shell:Check other settings
 sudo ufw status
-Status: inactive # activeになっている場合はk3sの通信要件などを整理し、適切に設定すること
+Status: inactive # If it is active, sort out the communication requirements of k3s and set it appropriately
 ```
-## K3sインストール
-ここからが本番ですが、準備あらかた終わったとも言える
-### K3s Master Nodeインストール 1台目
-[K3sのページ](https://k3s.io)では、手順は超シンプル、とガイドされています。インストールコマンド叩いて、ちょっとまって(30秒?)、k3s kubectl get nodeでノードがReadyになったことを確認する、と。これは本当です。ネイティブのK8sと比較すると、すごい、以外の言葉はありません。
-が、ここでは、やりたいことがあるので、オプション付きで進めます。
+## K3s Installation
+Preparations of the foundation has been completed, but the installation is almost completed.
 
-```shell:インストールコマンド
+### K3s Master Node installation - 1st unit
+According to the [K3s](https://k3s.io), the procedure is super simple. Run the install command, and wait a moment (30 seconds?),  then use the ```k3s kubectl get node``` to confirm that the node is ready. This is true. Compared to the native K8s, there is no other word for it but awesome.  
+But here is what we want to do, so let's proceed with options.
+
+```shell:installation command
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 [sudo] password for ubuntu:
 [INFO]  Finding release for channel stable
@@ -115,15 +116,15 @@ Created symlink /etc/systemd/system/multi-user.target.wants/k3s.service → /etc
 [INFO]  systemd: Starting k3s
 
 ```
-Master Node (K3sでは、Server Nodeと呼称するようですが、ここではMasterと記載します)
+Check the status of the Master Node (in K3s, it is called Server Node, but here it is called Master) and that the Pod has been deployed.
 
-```shell:nodeの確認
+```shell:check node status
 kubectl get nodes
 NAME   STATUS   ROLES                  AGE   VERSION
 e460   Ready    control-plane,master   21m   v1.20.6+k3s1
 ```
 
-```shell:podの状態確認
+```shell:check pods' status
 kubectl get pods -A
 NAMESPACE     NAME                                      READY   STATUS      RESTARTS   AGE
 kube-system   helm-install-traefik-tw4tp                0/1     Completed   0          21m
@@ -133,22 +134,22 @@ kube-system   svclb-traefik-7lwf4                       2/2     Running     0   
 kube-system   coredns-854c77959c-hxm94                  1/1     Running     0          21m
 kube-system   traefik-6f9cbd9bd4-4snp5                  1/1     Running     0          21m
 ```
-ここまでで、Server Node (Master Node) 1台目のセットアップはできました。1台で使う場合は以上で終了です。
+Now that you have set up the first Server Node (Master Node). For use with a single unit, this is all you need to do.
 
-## K3s Master Nodeインストール 2台目
-ここからクラスタ構成にするためのセットアップです。
-続きは、[Raspberry Piを使ってKubernetes Clusterを構築した記事](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_rasppi_jp.md#5k3s-%E3%81%AEcluster%E6%A7%8B%E6%88%90%E5%8C%96)をご参照ください。
+## K3s Worker Node installation
+Here is the setup for the cluster configuration.
+To read more, please refer to [Article on building a Kubernetes Cluster using a Raspberry Pi](https://github.com/fujitake/k8slearn/blob/main/docs/eng/configure_k3s_w_rasppi.md#5-cluster-configuration-of-k3s).
 
-*この手順は、Master Nodeを冗長構成にするための手順となります。Masterをシングル構成にする場合、スキップ可能な手順です*
+*This procedure is for adding Worker Node configuration. You can skip it, if you want to use the Master Node as a single configuration.*
 
-## 備考
-K3s Master Nodeのアンインストール方法
+## Note
+How to Uninstall K3s
 
-```shell:K3sアンインストールコマンド
-/usr/local/bin/k3s-uninstall.sh       # Master Node用
-/usr/local/bin/k3s-agent-uninstall.sh # Worker Node用
+```shell:K3s uninstallaton command
+/usr/local/bin/k3s-uninstall.sh       # For Master Node
+/usr/local/bin/k3s-agent-uninstall.sh # For Worker Node
 ```
 
-## 参考
-[RANCHER社のK3sリファレンス(英語)](https://rancher.com/docs/k3s/latest/en/)  
-[RANCHER Labs 日本語版K3sマニュアル](https://rancher.co.jp/pdfs/K3s-eBook4Styles0507.pdf)
+## References
+[RANCHER's K3s Reference](https://rancher.com/docs/k3s/latest/en/)  
+[RANCHER Labs K3s Manual (Japanese)](https://rancher.co.jp/pdfs/K3s-eBook4Styles0507.pdf)

@@ -1,145 +1,141 @@
-## はじめに
+## Introducion
 
-この手順を辿れば、Kubernetes Clusterが完成します。
+With following steps, you will be able to get a Kubernetes Cluster.
 
-Kubernetes Clusterを手元で作れば、クラウドのマネージドサービスに費用を払い続けることなく、動作を理解することができるんじゃないかな〜ってことでRaspberry Pi 4BでK3s Cluster環境を作ってみました。
-マネージドサービスだとMaster Nodeがみえない(っていうか理解しにくい)ので、物理的に目に見える方が楽かも？
+Creating a Kubernetes Cluster at your own hand would help you understanding how it works without keep paying to a cloud services. This article is for creating a K3s Cluster on a Raspberry Pi 4B.  
+With managed services, the Master Node is not visible (which makes it difficult to understand), so would be easier to understand, if it is physically visible.
 
-*Kubernetes自体、Pod、Deployment、StatefulSet、Namespace、CNIなど、基本を理解したい場合は、他の記事を読むことをお勧めします。最終的には理解してないとClusterとしての動作がわからんのですが、、、*
+*It is recommended to read other articles to understand the basics of Kubernetes itself, Pod, Deployment, StatefulSet, Namespace, CNI, etc. Finally, you need to know those words, if you want to understand Kubernetes as a Cluster.*
 
-## この記事について
-仕事の都合上、Kubernetesと戯れることが良くあります。周りからも聞かれることがあります。
-でも、初めのうちは、本でも読んで、自分で頑張ってみて〜って言っていました。
-が、ちゃんと業務で使えるレベルに情報共有しておいた方が良いかもね、と思い立ったので記事書きます。
-ここでは、Kubernetes Clusterを作って、その仕組みを理解しよう、という目的とします。マネージドサービスを使う前に仕組みを理解しておこうって感じの取り組みでも良いと思います。  
+## Purpose
+Selected K3s because we wanted to reduce the learning cost as much as possible. You don't need worry about installing the original Kubernetes and which CNI you should use.
+When I started to learn Kubernetes, I followed step by step and installed Kubernetes manually, but I strongly suggest you to learn with below steps, if you want to learn Kubernetes as a cluster. If you are ok to use as a single node, Minikube or Docker for Desktop would be enough.
 
-学習コストを極力下げるという意図もあり、K3sを使いました。
-オリジナルのKubernetesをインストールするとか、CNIは何にしよう、とか面倒なことは省きます。
-自分が学ぶときは、オリジナルのKubernetesを手順を一つ一つ追って、セットアップしました。それで理解したのですが、ほんの数年で超簡単になりましたね〜
+## 1. Prerequisites
 
-## 1.前提条件
+- Internet access environment
+- Knowledge of Linux using CLI commands
 
-- インターネットアクセス環境
-- LinuxをCLIのみで触る程度の知識か根性
+## 2. Prepare the Environment
+### Hardwaare
+- Raspberry Pi 4B 4GB Memory 4 units (you can install K3s to 3B/3B+, but not work very well.)
+- One set of keyboard, mouse and display is enough
+- Wired LAN or Wireless LAN
+- MAC or Windows (Host for OS image creation and Host for SSH access)
 
-## 2.環境を用意
-### ハードウェア
-- Raspberry Pi 4B 4GB Memory 4台(3B、3B+でも動作しました、ちょっともっさりするけど)
-- キーボード、マウス、ディスプレイは1セットあればOK
-- 有線LANか無線LAN
-- MACかWindows (OSイメージ作成用とSSHアクセス用のホスト)
-
-### ソフトウェア
-- OS: [Ubuntu Server 20.04.2 LTS 64ビット](https://ubuntu.com/download/raspberry-pi)
-- OSイメージ作成ツール: [balenaEthcher](https://www.balena.io/etcher)
+### Software
+- OS: [Ubuntu Server 20.04.2 LTS 64 bits](https://ubuntu.com/download/raspberry-pi)
+- OS Image Creation Tool: [balenaEthcher](https://www.balena.io/etcher)
 - K3s: [v1.20.6+k3s1](https://k3s.io)  
-*ネイティブKubernetesをインストールしても良いですが、CNI何にしよう、とか色々考える必要のないK3sが手元で試すKubernetes Clusterとしてはベストだと思います。たぶん。*
+OK to install native Kubernetes, but using K3s would be the best for learning without spending lots of time to dealing with details like what kind of CNI that you want to use, etc.
 
-### 構成イメージ
-クラスタ構成なので、workerを3台用意しています。master 1台とworker 1台でも機能検証はできるかと思います。
+### Configuration diagram
+If you want to understand cluster operations including failure happened, one master and three workers would be nice. Of course, one master and one worker would be enough to understand the functionality.
+
 ![raspbPi_k3s_cluster.png](../../imgs/raspbPi_k3s_cluster.png)
 
 
-## 3.下準備
-### OSイメージ作成
-- SDカードを用意し
-- OSイメージ作成用のMACかWindowsでbalenaEtcherをダウンロードして実行
-- 左からOSイメージの指定、ドライブ(SDカード)の指定、実行ボタン
+## 3. Preparations
+### Create OS image
+- Prepare SD cards as much as you need
+- Download and run balenaEtcher on MAC or Windows for OS image creation
+- From the left, specify the OS image, specify the drive (SD card), and click the Run button
 ![balenaEtcher](../../imgs/balenaEthcher.png)
 
 
-### 起動とOSセットアップ
-- Raspberry PiにSDカードを挿入し、起動  
-*事前にnetwork設定を指定する方法もありますが、今回はOS起動後に指定しています*
+### Boot and OS Setup
+- Insert the SD card into the Raspberry Pi and start it up  
+*There is also a way to specify the network settings in advance, but in this case, specified them after the OS was booted.*
 
-- 初期ログイン
+- Initial login
 
-```shell:初期ログイン
+```shell:Initial login
 Username: ubuntu
-Password: ubuntu #ログイン後変更を促される
+Password: ubuntu #Prompted to change it after logging in
 ```
 
-- ネットワーク設定ファイルの修正
+- Modify the network configuration file
 
 ```shell:cloud-init.yaml
-sudo cp /etc/netplan/50-cloud-init.yaml /etc/netplan/99-cloud-init.yaml # ファイルをコピー
+sudo cp /etc/netplan/50-cloud-init.yaml /etc/netplan/99-cloud-init.yaml # Copy the file
 sudo vi /etc/netplan/99-cloud-init.yaml
 ```
-- 99-cloud-init.yamlの修正
+- Modify 99-cloud-init.yaml
 
-```shell:修正例
+```shell:Example of modification
 # to it will not persist across an instance reboot.  To disable cloud-init's
 # network configuration capabilities, write a file
 # /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg with the following:
 # network: {config: disabled}
 network:
     version: 2
-    ethernets: # 有線LANの設定
+    ethernets: # Wired LAN Settings
         eth0:
-            dhcp4: false           #固定IPを付与
+            dhcp4: false           # Provide a static IP
             addresses:             #
-            - 192.168.1.11/24       #付与したいIPアドレス
-            gateway4: 192.168.1.1  #IPv4のデフォルトゲートウェイ
-            nameservers:           #DNSサーバ指定
+            - 192.168.1.11/24       # Provide the IP address
+            gateway4: 192.168.1.1  # Default gateway for IPv4
+            nameservers:           # DNS server specification
                 addresses:         #
-                - 192.168.1.1      #DNSサーバのIPアドレス
-    wifis: # 無線LANの設定
+                - 192.168.1.1      # Provide the IP address for DNS server
+    wifis: # Wireless LAN Settings
         wlan0:
-            dhcp4: true # 固定IPの場合、falseにする
+            dhcp4: true # For static IP, set to false
             optional: true
             access-points:
-              <yourssid>: # SSIDを<youssid>の箇所に入力、コロンの後に改行
-                password: “<yourpassword>” # パスワードはダブルクオートで囲む
+              <yourssid>: # Provide the SSID in the <youssid> field, followed by a colon and a new line
+                password: “<yourpassword>” # Enclose the password in double quotes
 
 ```
 
-- netplan applyの実行
+- Run netplan apply
 
-```shell:ネットワーク設定変更の適用
-sudo netplan apply # 設定変更の適用
+```shell:Apply network configuration changes
+sudo netplan apply # Apply configuration changes
 ```
 
-- キーボード設定
+- Keyboard settings
 
-```shell:キーボード設定
+```shell:Keyboard settings
 sudo dpkg-reconfigure keyboard-configuration
 ```
 
-- その他設定の確認
+- Check other settings
 
-```shell:その他設定の確認
+```shell:Check other settings
 sudo ufw status
-Status: inactive # activeになっている場合はk3sの通信要件などを整理し、適切に設定すること
+Status: inactive # If it is active, sort out the communication requirements of k3s and set it appropriately
 ```
-## 4.K3sインストール
-ここからが本番ですが、準備あらかた終わったとも言える
-### K3s動作条件の設定
-- コントロールグループ設定追加  
-`/boot/firmware/cmdline.txt`に`"cgroup_memory=1 cgroup_enable=memory"`を<font color="red">改行せず1行で記載</font>すること  
-設定変更後に再起動
+## 4. K3s Installation
+Preparations of the foundation has been completed, but the installation is almost completed.
 
-```shell:コントロールグループ設定追加
-sudo vi /boot/firmware/cmdline.txt # エラー結果では、/boot/cmdline.txtとなっているが、本環境では下記の通り
+### Setting K3s Running Conditions
+- Add control group settings  
+Put `"cgroup_memory=1 cgroup_enable=memory"` in `/boot/firmware/cmdline.txt` with **one line without line break**.  
+Reboot after added the settings.
+
+```shell:Add control group settings
+sudo vi /boot/firmware/cmdline.txt # In the error result, it is /boot/cmdline.txt, but in this environment, it is as follows
 net.ifnames=0 dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=LABEL=writable rootfstype=ext4 elevator=deadline rootwait fixrtc cgroup_memory=1 cgroup_enable=memory
 ```
 
-*上記設定を行わずにK3sをインストールすると、K3s Serverが起動しません。手動起動するとエラーが出力されます。しかーし、`/boot/cmdline.txt`というファイルがありません。正解はUbuntu 20.04.2 LTSではパスが`/boot/firemware/cmdline.txt`です。*
-*インストールスクリプトをこの設定の前に実行するとエラー表示されません。下記は明示的に実行した場合に表示されるエラーです。*
+*If installing K3s without the above settings, K3s Server will not start. If booting it manually, an error will be occurred. However, there is no file named `/boot/cmdline.txt`.To be correct, in Ubuntu 20.04.2 LTS, the path is `/boot/firemware/cmdline.txt`.*  
+*If running the installation script before this configuration, no error will be displayed.The following is the error that will be displayed when running explicitly.*
 
-```shell:k3s実行時のエラー
+```shell:k3s runtime error
 sudo k3s server &
-# 中略
+# omission (of middle part)
 INFO[2021-05-01T09:31:09.012475490Z] Run: k3s kubectl                             
 ERRO[2021-05-01T09:31:09.012840509Z] Failed to find memory cgroup, you may need to add "cgroup_memory=1 cgroup_enable=memory" to your linux cmdline (/boot/cmdline.txt on a Raspberry Pi)
 FATA[2021-05-01T09:31:09.012916768Z] failed to find memory cgroup, you may need to add "cgroup_memory=1 cgroup_enable=memory" to your linux cmdline (/boot/cmdline.txt on a Raspberry Pi)
 
 ```
 
-### K3s Master Nodeインストール 1台目
-[K3sのページ](https://k3s.io)では、手順は超シンプル、とガイドされています。インストールコマンド叩いて、ちょっとまって(30秒?)、k3s kubectl get nodeでノードがReadyになったことを確認する、と。これは本当です。ネイティブのK8sと比較すると、すごい、以外の言葉はありません。
-が、ここでは、やりたいことがあるので、オプション付きで進めます。
+### K3s Master Node installation
+According to the [K3s](https://k3s.io), the procedure is super simple. Run the install command, and wait a moment (30 seconds?),  then use the ```k3s kubectl get node``` to confirm that the node is ready. This is true. Compared to the native K8s, there is no other word for it but awesome.  
+But here is what we want to do, so let's proceed with options.
 
-```shell:インストールコマンド
+```shell:installation commnad
 curl -sfL https://get.k3s.io | sh -s - --write-kubeconfig-mode 644
 [INFO]  Finding release for channel stable
 [INFO]  Using v1.20.6+k3s1 as release
@@ -159,10 +155,10 @@ Created symlink /etc/systemd/system/multi-user.target.wants/k3s.service → /etc
 [INFO]  systemd: Starting k3s
 ```
 
-K3sサービスの状態確認
-下記のようになれば、正常に起動しています。
+Check the status of the K3s service  
+If it looks like the following, it is running correctly.
 
-```shell:K3sサービスの状態確認
+```shell:Check the status of the K3s service
 systemctl status k3s.service
 ● k3s.service - Lightweight Kubernetes
      Loaded: loaded (/etc/systemd/system/k3s.service; enabled; vendor preset: enabled)
@@ -188,15 +184,15 @@ systemctl status k3s.service
 
 ```
 
-Master Node (K3sでは、Server Nodeと呼称するようですが、ここではMasterと記載します)の状態とPodがデプロイされたことを確認します。
+Check the status of the Master Node (in K3s, it is called Server Node, but here it is called Master) and that the Pod has been deployed.
 
-```shell:nodeの確認
+```shell:check node status
 sudo kubectl get nodes
 NAME     STATUS   ROLES                  AGE   VERSION
 ubuntu   Ready    control-plane,master   18h   v1.20.6+k3s1
 ```
 
-```shell:podの状態確認
+```shell:check pods' status
 sudo kubectl get pods -A
 NAMESPACE     NAME                                      READY   STATUS      RESTARTS   AGE
 kube-system   metrics-server-86cbb8457f-vgw9n           1/1     Running     0          18h
@@ -206,20 +202,20 @@ kube-system   helm-install-traefik-gp4kc                0/1     Completed   0   
 kube-system   svclb-traefik-wh5s6                       2/2     Running     0          18h
 kube-system   traefik-6f9cbd9bd4-zt8pd                  1/1     Running     0          18h
 ```
-ここまでで、Server Node (Master Node) 1台目のセットアップはできました。1台で使う場合は以上で終了です。
+Now that you have set up the first Server Node (Master Node). For use with a single unit, this is all you need to do.
 
-## 5.K3s のCluster構成化
-ここからはクラスタ構成にするためのセットアップです。
-*この手順は、Master Nodeを冗長構成にするための手順となります。Masterをシングル構成にする場合、スキップ可能な手順です*
+## 5. Cluster configuration of K3s<a id="5-cluster-configuration-of-k3s"></a>
+Here is the setup for the cluster configuration.
+*This procedure is for making the Master Node a redundant configuration.This procedure can be skipped if configuring the Master in a single configuration.*
 
-### MasterとWorkerによるCluster構成の設定
-各Nodeのhostnameをユニークな名称で
+### Setting up a Cluster configuration with Master and Worker
+Set the hostname of each Node with a unique name
 
 ```shell:/etc/hostname
 sudo vi /etc/hostname
 master1
 ```
-各nodeでhostsファイルを編集し、hostnameでの通信ができるよう設定
+Edit the hosts file on each node and configure it to allow communication by hostname
 
 ```shell:/etc/hosts
 sudo vi /etc/hosts
@@ -229,20 +225,20 @@ sudo vi /etc/hosts
 192.168.1.23 agent3
 ```
 
-K3s Master Nodeのnode-tokenを確認
+Check the node-token of K3s Master Node
 
-```shell:node-tokenの確認
+```shell:Check node-token
 sudo cat /var/lib/rancher/k3s/server/node-token
-K10***0f #省略しています
+K10***0f # It is omitted
 ```
-K3s agent nodeのInstall (Agentの3台分実施)
-*Raspberry Piで必要なおまじない、コントロールグループの設定は、全てのnodeで行うこと*
-*ノード間でホスト名が名前解決できる必要がある*
+Install K3s agent nodes (Install for 3 Agents)  
+*The spell and control group settings required for the Raspberry Pi must be done on all nodes*  
+*Host names need to be able to be name resolved between nodes*
 
-```shell:Agentのインストール
+```shell:Uninstallaton Agent
 curl -sfL https://get.k3s.io | K3S_URL=https://master1:6443 K3S_TOKEN=K10****0f sh -f
 ```
-Nodeを確認
+Check Nodes' status
 
 ```
 kubectl get nodes -o wide
@@ -254,13 +250,13 @@ worker2   Ready    <none>                 5m23s   v1.21.1+k3s1   192.168.1.22   
 ```
 
 ##
-## 備考
-K3s Master Nodeのアンインストール方法
+## Note
+How to Uninstall K3s
 
-```shell:K3sアンインストールコマンド
-/usr/local/bin/k3s-uninstall.sh       # Master Node用
-/usr/local/bin/k3s-agent-uninstall.sh # Worker Node用
+```shell:K3s uninstallaton command
+/usr/local/bin/k3s-uninstall.sh       # For Master Node
+/usr/local/bin/k3s-agent-uninstall.sh # For Worker Node
 ```
-## 参考
-[RANCHER社のK3sリファレンス(英語)](https://rancher.com/docs/k3s/latest/en/)  
-[RANCHER Labs 日本語版K3sマニュアル](https://rancher.co.jp/pdfs/K3s-eBook4Styles0507.pdf)
+## References
+[RANCHER's K3s Reference](https://rancher.com/docs/k3s/latest/en/)  
+[RANCHER Labs K3s Manual (Japanese)](https://rancher.co.jp/pdfs/K3s-eBook4Styles0507.pdf)

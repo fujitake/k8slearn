@@ -135,14 +135,14 @@ kube-system   traefik-6f9cbd9bd4-4snp5                  1/1     Running     0   
 ```
 ここまでで、Server Node (Master Node) 1台目のセットアップはできました。1台で使う場合は以上で終了です。
 
-## K3s Master Nodeインストール 2台目
+## K3s Worker Nodeの追加
 ここからクラスタ構成にするためのセットアップです。
 続きは、[Raspberry Piを使ってKubernetes Clusterを構築した記事](https://github.com/fujitake/k8slearn/blob/main/docs/20210614_configure_k3s_w_rasppi_jp.md#5k3s-%E3%81%AEcluster%E6%A7%8B%E6%88%90%E5%8C%96)をご参照ください。
 
-*この手順は、Master Nodeを冗長構成にするための手順となります。Masterをシングル構成にする場合、スキップ可能な手順です*
+*上記手順は、Worker Nodeを追加するための手順となります。Masterをシングル構成にて利用する場合、スキップ可能です*
 
 ## 備考
-K3s Master Nodeのアンインストール方法
+K3sのアンインストール方法
 
 ```shell:K3sアンインストールコマンド
 /usr/local/bin/k3s-uninstall.sh       # Master Node用
