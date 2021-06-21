@@ -4,8 +4,8 @@ This repository is for sharing memo of learning Kubernetes.
 ### Understanding Kubernetes basics
 
 - [Create Kubernetes Cluster with Raspberry Pi](docs/eng/configure_k3s_w_rasppi.md)
-- [Create Kubernetes Cluster with Note PC](docs/jp/configure_k3s_w_notepc.md)
-- [Set up Database Pods on Kubernetes](docs/jp/setup_db_pods.md)
+- [Create Kubernetes Cluster with Note PC](docs/eng/configure_k3s_w_notepc.md)
+- [Set up Database Pods on Kubernetes](docs/eng/setup_db_pods.md)
 - Launch web service on Kubernetes Cluster
 - Try to do failure test with simple Pods
 - Improve availability of the Pods
