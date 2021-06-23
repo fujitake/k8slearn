@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alpine-f-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alpine-f-deploy
+  template:
+    metadata:
+      labels:
+        app: alpine-f-deploy
+    spec:
+      containers:
+        - image: fujitake/alpine-f:1.1
+          name: alpine-f-deploy
+          tty: true
