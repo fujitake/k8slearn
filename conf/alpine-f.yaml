@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine-f
+spec:
+  containers:
+  - name: alpine-f
+    image: docker.io/fujitake/alpine-f:1.1
+    stdin: true
+    tty: true
