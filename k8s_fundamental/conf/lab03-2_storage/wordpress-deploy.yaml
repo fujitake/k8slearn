@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Service      # ブラウザからのアクセス用にNodePortを作成
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 80
+  selector:
+    app: wordpress
+    tier: frontend
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: frontend
+    spec:
+      containers:
+      - image: wordpress:4.8-apache
+        name: wordpress
+        env:             # MySQLの接続情報(Service名とSecretのデータから値を参照)
+        - name: WORDPRESS_DB_HOST
+          value: wordpress-mysql
+        - name: WORDPRESS_DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        ports:
+        - containerPort: 80
+          name: wordpress
+        volumeMounts:     # /var/www/htmlディレクトリにマウント
+        - name: wordpress-persistent-storage
+          mountPath: /var/www/html
+      volumes:            # PVC経由で作成したWordPress用PVを割り当てる
+      - name: wordpress-persistent-storage
+        persistentVolumeClaim:
+          claimName: pv-claim-frontend

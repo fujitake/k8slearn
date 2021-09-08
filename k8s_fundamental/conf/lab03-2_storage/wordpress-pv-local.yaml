@@ -1,0 +1,95 @@
+kind: StorageClass          # VolumeBindingModeが違う2種類のStorageClassを定義
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: Immediate
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: local-storage-wait
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
+apiVersion: v1
+kind: PersistentVolume        # ローカルマシンのディレクトリをPVとして作成
+metadata:
+  name: pv-frontend       # Wordpress Pod用のPV
+  labels:
+    app: wordpress
+    tier: pv-frontend
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage-wait
+  local:
+    path: <input your localmachine directory path>  # ローカルマシンのディレクトリパス
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+---
+apiVersion: v1
+kind: PersistentVolume        # ローカルマシンのディレクトリをPVとして作成
+metadata:
+  name: pv-mysql          # MySQL Pod用のPV
+  labels:
+    app: wordpress
+    tier: pv-mysql
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: <input your localmachine directory path>  # ローカルマシンのディレクトリパス
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - docker-desktop
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-claim-frontend  # Wordpress 用のPVClaim
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: pv-frontend
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage-wait
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pv-claim-mysql     # MySQL 用のPVClaim
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: pv-mysql
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 1Gi

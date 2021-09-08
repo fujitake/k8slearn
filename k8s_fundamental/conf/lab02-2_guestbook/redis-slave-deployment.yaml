@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment                 # Deploymentマニフェスト
+metadata:
+  name: redis-slave              # Deploymentリソースの名前
+spec:
+  selector:
+    matchLabels:                 # ReplicaSetが管理(検索)するPodのラベル
+      app: redis
+      role: slave
+      tier: backend
+  replicas: 1                    # ReplicaSetが生成・管理するPodの数
+  template:                      # ここからPodの定義
+    metadata:
+      labels:                    # Podのラベル
+        app: redis
+        role: slave
+        tier: backend
+    spec:
+      containers:
+      - name: slave              # コンテナ名
+        image: gcr.io/google_samples/gb-redisslave:v1  # コンテナイメージ
+        resources:               # 使用するCPU, Memoryの指定
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:                     # 環境変数
+        - name: GET_HOSTS_FROM
+          value: dns
+        ports:                   # EXPOSEするポートの指定
+        - containerPort: 6379

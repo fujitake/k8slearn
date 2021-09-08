@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rs-default
+  labels:
+    app: nginx
+    release: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # rs-default ReplicaSetが管理するPodのlabelを設定
+      app: nginx 
+      release: default
+  template:
+    metadata:
+      labels: # Podのlabelを設定
+        app: nginx
+        release: default
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.15 
+        env: 
+        - name: BACKEND_HOST
+          value: localhost:8080
+        ports:
+        - containerPort: 80 
+---
+apiVersion: v1
+kind: Service  # リソースの種類をServiceに
+metadata:
+  name: nginx-svc-default   # Service名、名前解決に利用
+spec:
+  type: ClusterIP
+  selector:    # ServiceのターゲットとするPodのラベル
+    app: nginx
+    release: default
+  ports:
+    - name: http
+      port: 80 # 転送先port

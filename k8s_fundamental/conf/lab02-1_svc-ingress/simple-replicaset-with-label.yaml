@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rs-tokyo
+  labels:
+    app: nginx
+    release: tokyo
+spec:
+  replicas: 1
+  selector:
+    matchLabels: # rs-tokyo ReplicaSetが管理するPodのlabelを設定
+      app: nginx
+      release: tokyo
+  template:
+    metadata:
+      labels: # Podのlabelを設定
+        app: nginx
+        release: tokyo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.13
+        env:
+        - name: BACKEND_HOST
+          value: localhost:8080
+        ports:
+        - containerPort: 80
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: rs-osaka
+  labels:
+    app: nginx
+    release: osaka
+spec:
+  replicas: 2
+  selector:
+    matchLabels: # rs-osaka ReplicaSetが管理するPodのlabelを設定
+      app: nginx
+      release: osaka
+  template:
+    metadata:
+      labels: # Podのlabelを設定
+        app: nginx
+        release: osaka 
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.14
+        env:
+        - name: BACKEND_HOST
+          value: localhost:8080
+        ports:
+        - containerPort: 80

@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Secret
+metadata:             # MySQLのパスワード情報
+  name: mysql-secret
+type: Opaque          # スキーマレスでsecret を定義するタイプ
+data:                 # 渡したい値を Key: Value の形式で定義
+  MYSQL_ROOT_PASSWORD: cGFzc3dvcmRzZWM=  # 「passwordsec」のbase64エンコード
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  ports:
+    - port: 3306
+  selector:
+    app: wordpress
+    tier: mysql
+  clusterIP: None
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wordpress-mysql
+  labels:
+    app: wordpress
+spec:
+  selector:
+    matchLabels:
+      app: wordpress
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: wordpress
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:       # /var/lib/mysqlディレクトリにマウント
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:              # PVC経由で作成したMySQL用PVを割り当てる
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: pv-claim-mysql

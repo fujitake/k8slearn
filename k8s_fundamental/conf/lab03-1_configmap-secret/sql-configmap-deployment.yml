@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mysql-configmap
+data:                 # 渡したい値を Key: Value の形式で定義
+  MYSQL_ROOT_PASSWORD: passwordconf
+  test_num_val: "100"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+spec:
+  ports:
+  - port: 3306
+  selector:
+    app: mysql
+  clusterIP: None     # PodのIPで直接アクセス
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        envFrom:          # 環境変数を定義
+        - configMapRef:   # ConfigMapを環境変数として渡す
+            name: mysql-configmap
+        ports:
+        - containerPort: 3306
+          name: mysql
+

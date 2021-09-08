@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service    # リソースの種類をServiceに
+metadata:
+  name: nginx
+spec:
+  type: NodePort # Serviceの種類、デフォルト(指定なし)の場合ClusterIPとなる
+  selector:      # ServiceのターゲットとするPodのラベル
+    app: nginx
+    release: osaka
+  ports:
+    - name: http
+      port: 80   # 転送先port
