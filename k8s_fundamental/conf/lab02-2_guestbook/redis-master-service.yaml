@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service           # Serviceのマニフェスト
+metadata:
+  name: redis-master    # Service名
+  labels:               # Serviceにつけるラベル
+    app: redis
+    role: master
+    tier: backend
+spec:
+  ports:
+  - port: 6379          # Serviceの受け付けるポート
+    targetPort: 6379    # コンテナが受け付けるポート
+  selector:             # ServiceのターゲットとするPodのラベル
+    app: redis
+    role: master
+    tier: backend

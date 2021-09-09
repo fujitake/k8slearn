@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress   # リソースの種類をIngressに
+metadata:
+  name: nginx-ing
+spec:
+  rules:        # ルーティングルール
+  - host: ingress.test.local
+    http:
+      paths:
+      - path: /
+        backend: # 転送先 
+          serviceName: nginx-svc
+          servicePort: 80
+
+          

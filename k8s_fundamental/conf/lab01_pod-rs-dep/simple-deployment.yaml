@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment # リソースの種類をDeploymentに
+metadata:        # Deploymentのメタデータ
+  name: simple-ds
+  labels:
+    app: simple 
+spec:            # ReplicaSetの定義と同じ
+  replicas: 2
+  selector:
+    matchLabels: # ReplicaSetが管理(検索)するPodのラベル
+      app: simple 
+  template:      # template以下はPodリソースにおけるspec定義と同じ
+    metadata:
+      labels:
+        app: simple
+    spec:
+      containers:
+      - name: nginx 
+        image: nginx:1.13 
+        env: 
+        - name: BACKEND_HOST
+          value: localhost:8080
+        ports:
+        - containerPort: 80 
+      - name: echo
+        image: alpine
+        env: 
+        - name: HOGE 
+          value: fuga
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do date; sleep 10;done"] 

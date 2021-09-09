@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service  # リソースの種類をServiceに
+metadata:
+  name: nginx-svc-tokyo   # Service名、名前解決に利用
+spec:
+  type: ClusterIP
+  selector:    # ServiceのターゲットとするPodのラベル
+    app: nginx
+    release: tokyo
+  ports:
+    - name: http
+      port: 80 # 転送先port
+---
+apiVersion: v1
+kind: Service  # リソースの種類をServiceに
+metadata:
+  name: nginx-svc-osaka   # Service名、名前解決に利用
+spec:
+  type: ClusterIP
+  selector:    # ServiceのターゲットとするPodのラベル
+    app: nginx
+    release: osaka
+  ports:
+    - name: http
+      port: 80 # 転送先port

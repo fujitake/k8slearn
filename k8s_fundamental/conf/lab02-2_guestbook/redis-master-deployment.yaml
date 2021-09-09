@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment                 # Deploymentマニフェスト
+metadata:
+  name: redis-master             # Deploymentリソースの名前
+spec:
+  selector:
+    matchLabels:                 # ReplicaSetが管理(検索)するPodのラベル
+      app: redis
+      role: master
+      tier: backend
+  replicas: 1                    # ReplicaSetが生成・管理するPodの数
+  template:                      # ここからPodの定義
+    metadata:
+      labels:                    # Podのラベル
+        app: redis
+        role: master
+        tier: backend
+    spec:
+      containers:
+      - name: master             # コンテナ名
+        image: k8s.gcr.io/redis:e2e  # コンテナイメージ
+        resources:               # 使用するCPU, Memoryの指定
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:                   # EXPOSEするポートの指定
+        - containerPort: 6379

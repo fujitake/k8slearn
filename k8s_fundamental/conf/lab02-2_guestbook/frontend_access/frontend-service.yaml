@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service                 # Serviceのマニフェスト
+metadata:
+  name: frontend              # Serviceリソースの名前
+  labels:                     # ServiceにつけるLabel
+    app: guestbook
+    tier: frontend
+spec:
+  type: ClusterIP             # Serviceの種別
+  ports:
+  - port: 80                  # アクセスを受け付けるポート
+  selector:                   # 対象のPodを検索するときのLabel
+    app: guestbook
+    tier: frontend
+

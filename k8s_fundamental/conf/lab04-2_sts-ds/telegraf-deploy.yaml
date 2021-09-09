@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: Secret                                    # InfluxDBの接続情報
+metadata:
+  name: telegraf-secret
+  namespace: monitoring
+type: Opaque
+data: 
+  INFLUXDB_DB: bG9jYWxfbW9uaXRvcmluZw==         # 「local_monitoring」
+  INFLUXDB_USER: c2FtcGxl                       # 「sample」のbase64エンコード
+  INFLUXDB_USER_PASSWORD: cGFzc3dvcmQ=          # 「password」のbase64エンコード
+  INFLUXDB_URL: aHR0cDovL2luZmx1eGRiLTAuaW5mbHV4ZGI6ODA4Ng==   # 「http://influxdb-0.influxdb:8086」
+---
+apiVersion: v1
+kind: ConfigMap                                 # telegrafの設定情報
+metadata:
+  name: telegraf-config
+  namespace: monitoring
+data:                                           # logの保存先(influxdb)とlog収集先(k8s)の設定値
+  telegraf.conf: |+
+    [[outputs.influxdb]]
+      urls = ["$INFLUXDB_URL"]
+      database = "$INFLUXDB_DB"
+      username = "$INFLUXDB_USER"
+      password = "$INFLUXDB_USER_PASSWORD"
+    [[inputs.statsd]]
+    [[inputs.cpu]]
+    [[inputs.disk]]
+    [[inputs.diskio]]
+    [[inputs.kernel]]
+    [[inputs.mem]]
+    [[inputs.processes]]
+    [[inputs.swap]]
+    [[inputs.system]]
+    [[inputs.docker]]
+    [[inputs.kubernetes]]
+      url = "http://$TELEGRAF_KUBERNETES_ENDPOINT:10255"
+---
+apiVersion: apps/v1
+kind: DaemonSet                                 # telegraf Pod を配置するDaemonSet
+metadata:
+  namespace: monitoring
+  name: telegraf
+spec:
+  selector:
+    matchLabels:
+      app: telegraf
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: telegraf
+    spec:
+      containers:
+        - image: telegraf:1.10.0
+          name: telegraf
+          env:                                  # Podが配置されているNodeのホスト名
+          - name: TELEGRAF_KUBERNETES_ENDPOINT
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          envFrom:                              # InfluxDBへの接続情報
+            - secretRef:
+                name: telegraf-secret
+          volumeMounts:                         # telegrafの設定情報をファイルとしてマウント
+            - name: telegraf-config-volume
+              mountPath: /etc/telegraf/telegraf.conf
+              subPath: telegraf.conf
+              readOnly: true
+      volumes:                                  # ConfigMapを指定     
+        - name: telegraf-config-volume
+          configMap:
+            name: telegraf-config
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: telegraf
+#   namespace: monitoring
+# spec:
+#   type: NodePort
+#   selector:
+#     app: telegraf
+#   ports:
+#   - port: 8125
+#     targetPort: 8125
+#     protocol: "UDP"
