@@ -3,7 +3,7 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### Understanding Kubernetes basics
 
-- [k8s fundamental](k8s_fundamental/docs/en/readme.md) - a program to learn basic elements of k8s
+- [k8s fundamental](k8s_fundamental/docs/EN/readme.md) - a program to learn basic elements of k8s
 - [Create Kubernetes Cluster with Raspberry Pi](docs/eng/configure_k3s_w_rasppi.md)
 - [Create Kubernetes Cluster with Note PC](docs/eng/configure_k3s_w_notepc.md)
 - [Set up Database Pods on Kubernetes](docs/eng/setup_db_pods.md)
@@ -29,7 +29,7 @@ This repository is for sharing memo of learning Kubernetes.
 このリポジトリは、Kubernetesを学ぶためのメモを共有するものです。
 
 ### Kubernetesの基礎を実践的に理解する
-- [k8s fundamental](k8s_fundamental/docs/jp/readme.md) -　k8sの基本用を学ぶプログラム
+- [k8s fundamental](k8s_fundamental/docs/JP/readme.md) -　k8sの基本用を学ぶプログラム
 - [2時間でRaspberry Piを使ったKubernetes Clusterを作る](docs/jp/configure_k3s_w_rasppi.md)
 - [ノートPCを使ってKubernetes Clusterを作ってみた](docs/jp/configure_k3s_w_notepc.md)
 - [Kubernetes上でデータベースPodを作成してみる](docs/jp/setup_db_pods.md)
