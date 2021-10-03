@@ -47,4 +47,5 @@ This repository is for sharing memo of learning Kubernetes.
 
 - SSL証明書の作り方
 - [楕円曲線SSL証明書の作り方](docs/jp/create_ecdsa_sslcert.md)
-- Dockerを使って、x86-64とARM64の両方に対応したコンテナイメージを作成する
+- [UbuntuにDockerをインストールし、コンテナイメージをbuildする](docs/jp/build_container_image_onUbuntu.md)
+- [Docker buildxを使って、x86-64とARM64の両方に対応したコンテナイメージをbuildする](docs/jp/build_container_image_wMultiCPUArch.md)
