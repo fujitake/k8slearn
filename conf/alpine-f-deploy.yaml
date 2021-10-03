@@ -13,6 +13,6 @@ spec:
         app: alpine-f-deploy
     spec:
       containers:
-        - image: fujitake/alpine-f:1.1
+        - image: quay.io/fujitake/alpine-f:1.2
           name: alpine-f-deploy
           tty: true

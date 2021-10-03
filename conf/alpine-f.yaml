@@ -5,6 +5,6 @@ metadata:
 spec:
   containers:
   - name: alpine-f
-    image: docker.io/fujitake/alpine-f:1.1
+    image: quay.io/fujitake/alpine-f:1.2
     stdin: true
     tty: true
