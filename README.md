@@ -45,7 +45,7 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### その他
 
-- SSL証明書の作り方
+- [Let's Encryptを使ったサーバ証明書の作り方](docs/jp/how_to_create_ssl_certificate.md)
 - [楕円曲線SSL証明書の作り方](docs/jp/create_ecdsa_sslcert.md)
 - [UbuntuにDockerをインストールし、コンテナイメージをbuildする](docs/jp/build_container_image_onUbuntu.md)
 - [Docker buildxを使って、x86-64とARM64の両方に対応したコンテナイメージをbuildする](docs/jp/build_container_image_wMultiCPUArch.md)

@@ -1,64 +1,75 @@
 # テスト用SSL/TLS証明書作成方法
 
+## 条件
+
+本手順で作業を行うための条件は以下の通り。
+
+- ドメイン名を所有していること
+- 上記ドメインのDNSサーバの設定変更ができること
+- 証明書を取得するFQDNを一時的に作業を行う端末に設定できること
+
 ## Let's Encryptを使ったSSL/TLS証明書の作成方法
 
-自分でドメイン名を有することが、以下のステップを実施する条件となる。
-また、以下のサーバは、実際に構築しようしているドメイン名と同じに指定してアクセスを確認する必要がある
+aws等でLinuxを起動
 
+上記サーバが`証明書発行対象のFQDNとしてアクセスできること`かつ`tcp 80でアクセス可能なこと`を満たす
 
-1) aws等でLinuxを起動
-2) 上記サーバが、以下の2つの条件を満たすように設定
-　・対象のdomain nameとしてアクセスできること
-　・tcp 80/443でアクセスできること(おそらく実際は80のみ)
-2) git clone https://github.com/certbot/certbot を実行
-3) cd certbot
-4) ./certbot-auto --help で動作することを確認
-5) $ ./certbot-auto certonly --standalone -t
-　不足しているパッケージ等の自動インストールが行われる
-　その後、 email addressを聞かれる
-　次にTerms of Serviceに同意することを確認させる
-　次に、上記email address宛にマーケティングメッセージの送信を希望するか確認される
-　最後にドメイン名を入力
-6) Congratulations! と表記されたらOK、そうではない場合、エラー内容を確認し、再度実行
-7) VANTIQで利用する際は、fullchain.pemとprivkey.pemを secrets.yaml で指定 (cert.pemを使うとブラウザは動作するが、VANTIQ間での利用ができない)
+以下のコマンドにて`certbot`をインストール
 
-参考情報
-https://qiita.com/HeRo/items/f9eb8d8a08d4d5b63ee9
-
-#### Notes
-同じドメイン名で更新すると1回目と違い、fullchain1.pemという感じで、末尾に1という数字が付与される。おそらく1回目の更新という意味かと。
-ちなみにrenewで作成ではなく、新しく作ったec2インスタンスにてcertbot-auto certonly --standalone -tで作成した
-
-
-
-## 自己証明書(オレオレ証明書)を使った場合の注意点
-
-自己証明書(オレオレ証明書)を使った場合、postman、curlなどアクセスできないケースが大半である
-#### VANTIQからオレオレ証明書のVANTIQ環境にRemote source:
-ssl handshake error
-
-####postman
-ssl handshake後にエラーが出力される(実際は存在しているVANTIQ Topic)
-```
-404 Not Found
-{
-    "error": "Resource not found: /api/v1/resources/topics//MyTopic"
-}
+```sh:
+snap install --classic certbot
 ```
 
-#### curl
-下記のようなエラーが出力される
-```
-curl: (60) SSL certificate problem: self signed certificate
-More details here: https://curl.haxx.se/docs/sslcerts.html
+以下のコマンドを実行し、証明書を作成
 
-curl failed to verify the legitimacy of the server and therefore could not
-establish a secure connection to it. To learn more about this situation and
-how to fix it, please visit the web page mentioned above.
+```sh:
+sudo certbot certonly -d "your.domain.name","your.domain.name" --server https://acme-v02.api.letsencrypt.org/directory --register-unsafely-without-email
 ```
 
-####Python
-Verifyする場合：`requests.exceptions.SSLError: HTTPSConnectionPool(host='tkeksfuji7.longnameofdomaintest.tk', port=443): Max retries exceeded with url: /api/v1/resources/topics//start (Caused by SSLError(SSLCertVerificationError(1, '[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: self signed certificate (_ssl.c:1056)')))`
+次のようなメッセージが表示されるので`1`を入力し`enter`を押下
 
-Verifyしない場合：
-`/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/urllib3/connectionpool.py:851: InsecureRequestWarning: Unverified HTTPS request is being made. Adding certificate verification is strongly advised. See: https://urllib3.readthedocs.io/en/latest/advanced-usage.html#ssl-warnings InsecureRequestWarning)`
+```sh:
+Saving debug log to /var/log/letsencrypt/letsencrypt.log
+
+How would you like to authenticate with the ACME CA?
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+1: Spin up a temporary webserver (standalone)
+2: Place files in webroot directory (webroot)
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Select the appropriate number [1-2] then [enter] (press 'c' to cancel): 1
+```
+
+Terms of Serviceを読んで同意する、`y`を入力して`enter`を押下
+
+```sh:
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+Please read the Terms of Service at
+https://letsencrypt.org/documents/LE-SA-v1.2-November-15-2017.pdf. You must
+agree in order to register with the ACME server. Do you agree?
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+(Y)es/(N)o: y
+```
+
+適切に処理が行われれば、下記のように成功する。
+
+```sh:
+Account registered.
+Requesting a certificate for your.domain.name
+
+Successfully received certificate.
+Certificate is saved at: /etc/letsencrypt/live/your.domain.name/fullchain.pem
+Key is saved at:         /etc/letsencrypt/live/your.domain.name/privkey.pem
+This certificate expires on 2022-02-11.
+These files will be updated when the certificate renews.
+Certbot has set up a scheduled task to automatically renew this certificate in the background.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+If you like Certbot, please consider supporting our work by:
+ * Donating to ISRG / Let's Encrypt:   https://letsencrypt.org/donate
+ * Donating to EFF:                    https://eff.org/donate-le
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+```
+
+## 参考情報
+
+Vantiq Private Cloudで利用する際は、`fullchain.pem`と`privkey.pem`を使用する

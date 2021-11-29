@@ -2,6 +2,8 @@
 
 Docker buildxを使ってAMD64とARM64に対応したコンテナイメージを一括作成する方法を紹介します。
 
+(2021/11/29)`postgresql-client`のインストールがAMD64とARM64の両方でできるように手順を修正
+
 (2021/10/2)この手順でAMD64とARM64に対応したコンテナを作成することができるが、`postgresql-client`のインストールに失敗しており、期待する結果を得られていない。
 詳細は[こちら](https://gitlab.alpinelinux.org/alpine/aports/-/issues/12406)を参照
 
@@ -20,7 +22,9 @@ Docker buildxを使ってAMD64とARM64に対応したコンテナイメージを
 
 Dockerfileを用意
 
-2021/10/2現在、`RUN apk add --no-cache postgresql-client`がlinux/arm64で失敗することがわかっている
+2021/11/29、`multiarch/qemu-user-static`を使うことでlinux/arm64のビルドが成功することを確認
+
+~~2021/10/2現在、`RUN apk add --no-cache postgresql-client`がlinux/arm64で失敗することがわかっている~~
 
 ```sh:
 FROM alpine:3.8.5
@@ -103,7 +107,7 @@ Platforms: linux/amd64*, linux/arm64*, linux/386
 
 コンテナイメージをpushするコンテナレジストリを指定してログイン
 
-*複数のCPUアーキテクチャに対応したイメージを作成しても、ローカルマシンのCPUアーキテクチャが複数対応できるわけではないため、`--push`でリポジトリに登録する方が利便性が高い*
+*複数のCPUアーキテクチャに対応したイメージを作成して`--push`でリポジトリに登録する方が利便性が高い、というかそれ以外に利用シーンがあるのかな？*
 
 ```sh:
 docker login quay.io
@@ -113,38 +117,49 @@ Password:
 Login Succeeded
 ```
 
+multiarch/qemu-user-staticをインストール、これがないと違うCPU Arch上で動作させるDockerfile内のRUNコマンド失敗する
+
+```sh:
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+```
+
 buildxを使って、コンテナイメージをビルドし、上記にてログインした`quay.io`のリポジトリにイメージをpushする
 
 ```sh:
-$ docker buildx build --platform linux/amd64,linux/arm64 -t quay.io/fujitake/alpine-f:1.2 --push .
-[+] Building 14.3s (12/12) FINISHED                                                                                                             
- => [internal] load build definition from Dockerfile                                                                                       0.0s
- => => transferring dockerfile: 107B                                                                                                       0.0s
- => [internal] load .dockerignore                                                                                                          0.0s
- => => transferring context: 2B                                                                                                            0.0s
- => [linux/arm64 internal] load metadata for docker.io/library/alpine:3.7.3                                                                0.6s
- => [linux/amd64 internal] load metadata for docker.io/library/alpine:3.7.3                                                                0.7s
- => [linux/amd64 1/2] FROM docker.io/library/alpine:3.7.3@sha256:8421d9a84432575381bfabd248f1eb56f3aa21d9d7cd2511583c68c9b7511d10          0.0s
- => => resolve docker.io/library/alpine:3.7.3@sha256:8421d9a84432575381bfabd248f1eb56f3aa21d9d7cd2511583c68c9b7511d10                      0.0s
- => [linux/arm64 1/2] FROM docker.io/library/alpine:3.7.3@sha256:8421d9a84432575381bfabd248f1eb56f3aa21d9d7cd2511583c68c9b7511d10          0.0s
- => => resolve docker.io/library/alpine:3.7.3@sha256:8421d9a84432575381bfabd248f1eb56f3aa21d9d7cd2511583c68c9b7511d10                      0.0s
- => CACHED [linux/amd64 2/2] RUN apk add --no-cache curl                                                                                   0.0s
- => CACHED [linux/arm64 2/2] RUN apk add --no-cache curl                                                                                   0.0s
- => exporting to image                                                                                                                    13.5s
- => => exporting layers                                                                                                                    0.0s
- => => exporting manifest sha256:cf384cf772d99bb53542bbdf7c3b57338af9f2662b7009d624ab597e473a3f2e                                          0.0s
- => => exporting config sha256:2e0e076a1f7f1f96ecdcf4b20d697a70a0ea3f0ddcc91f17ac16376737e17fe0                                            0.0s
- => => exporting manifest sha256:c6f5162efa7381a1ad69a59648c1a590ca4652788ec05e7e2b1906ce6c7fcba4                                          0.0s
- => => exporting config sha256:1ec6a3b32601879a3f646c6474e82a0e8aa632b8a386d94a83fa0e780a4b65d6                                            0.0s
- => => exporting manifest list sha256:0cbbab723523cd094d6f18581a8fc6519728f49de97d0da791b79bbba4dae00a                                     0.0s
- => => pushing layers                                                                                                                      7.5s
- => => pushing manifest for quay.io/fujitake/alpine-f:1.2@sha256:0cbbab723523cd094d6f18581a8fc6519728f49de97d0da791b79bbba4dae00a          6.0s
- => [auth] fujitake/alpine-f:pull,push token for quay.io                                                                                   0.0s
- => [auth] fujitake/alpine-f:pull,push token for quay.io                                                                                   0.0s
- => [auth] fujitake/alpine-f:pull,push token for quay.io     
+$ docker buildx build --platform linux/amd64,linux/arm64 -t quay.io/fujitake/alpine-f:1.3 --push .
+[+] Building 20.1s (11/11) FINISHED                                                                                                                                    
+ => [internal] load build definition from Dockerfile                                                                                                              0.0s
+ => => transferring dockerfile: 125B                                                                                                                              0.0s
+ => [internal] load .dockerignore                                                                                                                                 0.0s
+ => => transferring context: 2B                                                                                                                                   0.0s
+ => [linux/arm64 internal] load metadata for docker.io/library/alpine:3.8.5                                                                                       0.6s
+ => [linux/amd64 internal] load metadata for docker.io/library/alpine:3.8.5                                                                                       0.6s
+ => CACHED [linux/amd64 1/2] FROM docker.io/library/alpine:3.8.5@sha256:2bb501e6173d9d006e56de5bce2720eb06396803300fe1687b58a7ff32bf4c14                          0.0s
+ => => resolve docker.io/library/alpine:3.8.5@sha256:2bb501e6173d9d006e56de5bce2720eb06396803300fe1687b58a7ff32bf4c14                                             0.0s
+ => CACHED [linux/arm64 1/2] FROM docker.io/library/alpine:3.8.5@sha256:2bb501e6173d9d006e56de5bce2720eb06396803300fe1687b58a7ff32bf4c14                          0.0s
+ => => resolve docker.io/library/alpine:3.8.5@sha256:2bb501e6173d9d006e56de5bce2720eb06396803300fe1687b58a7ff32bf4c14                                             0.0s
+ => [linux/amd64 2/2] RUN apk add --no-cache curl postgresql-client                                                                                               1.9s
+ => [linux/arm64 2/2] RUN apk add --no-cache curl postgresql-client                                                                                               3.9s
+ => exporting to image                                                                                                                                           15.4s
+ => => exporting layers                                                                                                                                           2.2s
+ => => exporting manifest sha256:05e2c16a122ab894e5b5edd9004bdf32b65ba4cf1094dd54164b5fa3db6d08ce                                                                 0.0s
+ => => exporting config sha256:6d570cfd805b737200755ad531a2d45e45a293cc6a4252daf8e78e7fbda05e0f                                                                   0.0s
+ => => exporting manifest sha256:01c2f539f236443dcaa90bcb4ef812946f260b050d54069238b9eebc638f4ea0                                                                 0.0s
+ => => exporting config sha256:936bdd8c8d01cd56e777b43f2b85cf158c98708979d8f11d9a9b6d8af587c6e0                                                                   0.0s
+ => => exporting manifest list sha256:d3971d046321f32b2606c072c4272ea3acf87142d08137460e0753c43b0e4968                                                            0.0s
+ => => pushing layers                                                                                                                                             6.6s
+ => => pushing manifest for quay.io/fujitake/alpine-f:1.3@sha256:d3971d046321f32b2606c072c4272ea3acf87142d08137460e0753c43b0e4968                                 6.5s
+ => [auth] fujitake/alpine-f:pull,push token for quay.io                                                                                                          0.0s
+ => [auth] fujitake/alpine-f:pull,push token for quay.io
 ```
 
 
 
 ## 参考
 [Docker docs/Docker buildx](https://matsuand.github.io/docs.docker.jp.onthefly/buildx/working-with-buildx/)
+
+multiarchで対応する場合は、これがキモ
+[multiarch/qemu-user-static](https://github.com/multiarch/qemu-user-static)
+
+こっちでもできるかも
+[tonistiigi/binfmt](https://github.com/tonistiigi/binfmt#installing-emulators)
