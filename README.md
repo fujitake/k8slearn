@@ -19,10 +19,9 @@ This repository is for sharing memo of learning Kubernetes.
 
 ### Misc
 
-- How to prepare SSL Cert
+- How to prepare SSL Cert by Let's Encrypt
 - Create SSL Cert with ECC
 - Create container images for x86-64 and ARM64 by Docker
-
 
 ## 目的
 
@@ -49,3 +48,6 @@ This repository is for sharing memo of learning Kubernetes.
 - [楕円曲線SSL証明書の作り方](docs/jp/create_ecdsa_sslcert.md)
 - [UbuntuにDockerをインストールし、コンテナイメージをbuildする](docs/jp/build_container_image_onUbuntu.md)
 - [Docker buildxを使って、x86-64とARM64の両方に対応したコンテナイメージをbuildする](docs/jp/build_container_image_wMultiCPUArch.md)
+- [docker-composeをvirtualbox上のubuntuにインストールする](docs/jp/install_docker-compose_virbox.md)
+- [docker-composeで実行するWeb+DBシステムにHTTPS Proxyを追加する](docs/jp/docker-compose_activate_ssl.md)
+- [Docker Desktopの有償化とpodman移行の検討](docs/jp/docker2podman.md)

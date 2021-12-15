@@ -2,6 +2,8 @@
 
 DockerをEC2インスタンスにインストールし、自分でコンテナイメージをbuildする方法を紹介します。
 
+ついでに`docker-compose`(v2ではない方)のインストール方法を紹介します。
+
 ## 前提条件
 
 ### ソフトウェア
@@ -10,26 +12,15 @@ DockerをEC2インスタンスにインストールし、自分でコンテナ�
 - Ubuntu 20.04を利用
 - インターネットアクセスを有効
 
-## インストール手順
+## docker engine インストール手順
 
-二種類あるので、それぞれ説明します。
+[Docker Engineの公式インストール手順](https://docs.docker.com/engine/install/ubuntu/)があります。
 
-### dockerのインストール、aptにて
-下記コマンドにてインストール
+apt/apt-getでインストールする場合は、上記公式手順の通りに進めてください。常に最新がインストールされます。
 
-```sh:
-sudo apt install docker.io
-```
+`package.deb`を使ってインストールする場合は、説明がないと少しわかりにくいので、参考として紹介します。
 
-今の状態では`docker info`などのコマンド実行時のアクセス権限がないため、ユーザ `ubuntu` をグループ 'docker' に追加し、dockerを再起動
-
-```sh:
-sudo usermod -g docker ubuntu
-sudo chgrp docker /var/run/docker.sock
-sudo systemctl restart docker
-```
-
-### dockerのインストール、debにて
+### debを使ったdocker engineのインストール
 
 [こちら](https://docs.docker.com/engine/install/ubuntu/)にある`Install from a package`でインストールする方法もある。
 
@@ -63,6 +54,23 @@ curl -OL https://download.docker.com/linux/ubuntu/dists/focal/pool/stable/amd64/
 sudo dpkg -i docker-ce-cli_19.03.15~3-0~ubuntu-focal_amd64.deb
 sudo dpkg -i containerd.io_1.4.10-1_amd64.deb
 sudo dpkg -i docker-ce_19.03.15~3-0~ubuntu-focal_amd64.deb
+```
+
+### dockerのインストール後の設定
+
+今の状態では`docker info`などのコマンド実行時のアクセス権限がないため、ユーザ `ubuntu` をグループ 'docker' に追加し、dockerを再起動
+
+確認
+
+```sh:
+cat /etc/group |grep docker
+```
+
+
+```sh:
+sudo groupadd docker
+sudo usermod -aG docker ubuntu
+newgrp docker
 ```
 
 ## コンテナイメージのビルド
@@ -138,5 +146,36 @@ fujitake/alpine-f   1.2       ec7088e17071   3 minutes ago   12.1MB
 alpine              3.13.6    12adea71a33b   4 weeks ago     5.61MB
 ```
 
+## docker-composeのインストール方法
+
+### インストールの条件
+
+docker engineがインストール済みであること
+
+dockerがルートではないユーザで実行できること
+
+### インストール方法
+
+下記コマンドにて、`linux/x86_64のv1.29.2`をインストールできます。
+
+```sh:
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-linux-x86_64" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+```
+
+### 確認
+
+```sh:
+$ docker-compose version
+docker-compose version 1.29.2, build 5becea4c
+docker-py version: 5.0.0
+CPython version: 3.7.10
+OpenSSL version: OpenSSL 1.1.0l  10 Sep 2019
+```
+
 ## 参考
 [Docker docs/Install Docker Engine on Ubuntu](https://docs.docker.com/engine/install/ubuntu/)
+
+[Docker docs/Install Compose](https://docs.docker.com/compose/install/)
+
+[Docker Compose Releases](https://github.com/docker/compose/releases)
