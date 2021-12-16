@@ -50,4 +50,5 @@ This repository is for sharing memo of learning Kubernetes.
 - [Docker buildxを使って、x86-64とARM64の両方に対応したコンテナイメージをbuildする](docs/jp/build_container_image_wMultiCPUArch.md)
 - [docker-composeをvirtualbox上のubuntuにインストールする](docs/jp/install_docker-compose_virbox.md)
 - [docker-composeで実行するWeb+DBシステムにHTTPS Proxyを追加する](docs/jp/docker-compose_activate_ssl.md)
-- [Docker Desktopの有償化とpodman移行の検討](docs/jp/docker2podman.md)
+- [Docker Desktopの有償化に伴うpodmanへの移行検討](docs/jp/docker2podman.md)
+- [podman podを試してみる](docs/jp/podman_pod.md)
