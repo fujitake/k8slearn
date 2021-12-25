@@ -110,7 +110,7 @@ Uxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxx
 Before continuing, verify the TXT record has been deployed. Depending on the DNS
 provider, this may take some time, from a few seconds to multiple minutes. You can
 check if it has finished deploying with aid of online tools, such as the Google
-Admin Toolbox: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.vantiqjp.com.
+Admin Toolbox: https://toolbox.googleapps.com/apps/dig/#TXT/_acme-challenge.your.domain.name.
 Look for one or more bolded line(s) below the line ';ANSWER'. It should show the
 value(s) you've just added.
 
@@ -133,10 +133,10 @@ Non-authoritative answer:
 _acme-challenge.your.domain.name	text = "Uxxxxxxxxxxxxx_xxxxxxxxxxxxxxxxxxxxxxx"
 
 Authoritative answers can be found from:
-vantiqjp.com	nameserver = ns-1781.awsdns-30.co.uk.
-vantiqjp.com	nameserver = ns-1288.awsdns-33.org.
-vantiqjp.com	nameserver = ns-802.awsdns-36.net.
-vantiqjp.com	nameserver = ns-246.awsdns-30.com.
+your.domain.name	nameserver = ns-1781.awsdns-30.co.uk.
+your.domain.name	nameserver = ns-1288.awsdns-33.org.
+your.domain.name	nameserver = ns-802.awsdns-36.net.
+your.domain.name	nameserver = ns-246.awsdns-30.com.
 ns-1781.awsdns-30.co.uk	internet address = 205.251.198.245
 ns-1781.awsdns-30.co.uk	has AAAA address 2600:9000:5306:f500::1
 ns-246.awsdns-30.com	internet address = 205.251.192.246
