@@ -101,7 +101,8 @@ Kubernetes環境を管理・運用するために必要な知識・スキルを�
 
 ## Labで利用するkubernetes環境
 
-  * 前半 - _Docker for Desktop_ を利用したシングルノードクラスタ環境でLabを実施
+  * 前半 - <del>_Docker for Desktop_</del> を利用したシングルノードクラスタ環境でLabを実施 
+    * **Docker Desktopは2021年9月に有料化開始しました。無償の環境については、[Podman](../../../docs/jp/docker2podman.md)もしくは[Rancher Desktop](https://qiita.com/moritalous/items/14d4099023981dcf4fd2)を検討ください。**
   * 後半 - _Docker\+kind_ を利用したマルチノードクラスタ環境でLabを実施
 
   * (参考) その他の __Kubernetes__  __環境の種類__
