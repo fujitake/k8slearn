@@ -101,7 +101,8 @@ To acquire the knowledge and skills required to manage and operate Kubernetes en
 
 ## kubernetes environment used in Lab
 
-  * First half - Lab will be operated in a single node cluster environment with _Docker for Desktop_.
+  * First half - Lab will be operated in a single node cluster environment <del>with _Docker for Desktop_</del>.
+     * **Docker Desktop requires a paid subscription starting September 2021. For the free docker environment, please consider to [Rancher Desktop](https://rancherdesktop.io/) or [Podman](../../../docs/jp/docker2podman.md)** (in Japanese).
   * Second half - Lab will be operated in a multi-node cluster environmet with _Docker\+kind_.
 
   * Other __Types of Kubernetes environments__
